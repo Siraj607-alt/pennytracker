@@ -1,0 +1,7 @@
+/gradlew text eol=lf
+*.bat text eol=crlf
+*.jar binary
+# Ignore frontend files for GitHub language stats
+*.html linguist-vendored
+*.js linguist-vendored
+*.css linguist-vendored

@@ -1,0 +1,78 @@
+<!doctype html>
+<<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Expense</title>
+  <link rel="stylesheet" href="/css/style.css"> <!-- your existing CSS -->
+</head>
+
+<body>
+
+<div class="title-container">
+  <h1 class="main-title">Add Expense</h1>
+</div>
+
+<div class="card">
+  <h1>Record a New Expense</h1>
+
+  <form id="expenseForm" action="/add-expense" method="POST" novalidate>
+
+    <!-- Amount -->
+    <div class="field">
+      <label for="amount">Amount (₹)</label>
+      <input id="amount" name="amount" type="number" step="0.01" placeholder="Enter amount" required>
+
+      <div class="validation">
+        <div class="tick" id="tick-amount"><svg viewBox="0 0 24 24"><path d="M20.285 6.709a1 1 0 0 0-1.414-1.418L9 15.17 5.129 11.3a1 1 0 1 0-1.415 1.415l4.293 4.293a1 1 0 0 0 1.414 0L20.285 6.71z"/></svg></div>
+        <div class="ok" id="ok-amount">Looks good</div>
+        <div class="error" id="err-amount">Enter a valid amount</div>
+      </div>
+    </div>
+
+    <!-- Category -->
+    <div class="field">
+      <label for="category">Category</label>
+      <select id="category" name="category" required>
+        <option value="">Select category</option>
+        <option>Food</option>
+        <option>Travel</option>
+        <option>Shopping</option>
+        <option>Bills</option>
+        <option>Groceries</option>
+        <option>Health</option>
+        <option>Entertainment</option>
+        <option>Other</option>
+      </select>
+
+      <div class="validation">
+        <div class="tick" id="tick-category"><svg viewBox="0 0 24 24"><path d="M20.285 6.709a1 1 0 0 0-1.414-1.418L9 15.17 5.129 11.3a1 1 0 1 0-1.415 1.415l4.293 4.293a1 1 0 0 0 1.414 0L20.285 6.71z"/></svg></div>
+        <div class="ok" id="ok-category">Category selected</div>
+        <div class="error" id="err-category">Please choose a category</div>
+      </div>
+    </div>
+
+    <!-- Note -->
+    <div class="field">
+      <label for="description">Description (optional)</label>
+      <input id="description" name="description" type="text" placeholder="Example: Pizza, cab ride, medicines">
+    </div>
+
+    <!-- Date -->
+    <div class="field">
+      <label for="date">Date</label>
+      <input id="date" name="date" type="date" required>
+
+      <div class="validation">
+        <div class="tick" id="tick-date"><svg viewBox="0 0 24 24"><path d="M20.285 6.709a1 1 0 0 0-1.414-1.418L9 15.17 5.129 11.3a1 1 0 1 0-1.415 1.415l4.293 4.293a1 1 0 0 0 1.414 0L20.285 6.71z"/></svg></div>
+        <div class="ok" id="ok-date">Valid date</div>
+        <div class="error" id="err-date">Select a date</div>
+      </div>
+    </div>
+
+    <button type="submit">Add Expense</button>
+  </form>
+</div>
+
+<script src="/images/addexpense.js"></script>
+</body>
+</html>

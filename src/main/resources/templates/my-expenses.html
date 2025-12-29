@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Expenses</title>
+
+    <style>
+        body {
+            font-family: Inter, sans-serif;
+            margin: 0;
+            background: #f7f8fc;
+            background-image: url('/images/expenses.png');
+        }
+
+        .navbar {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .navbar h2 { margin: 0; }
+
+        .navbar a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #555;
+            font-size: 16px;
+        }
+
+        .navbar a:hover {
+            color: #4A90E2;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+
+
+        /* ---- CHART CARD STYLE ---- */
+        .chart-section {
+            width: 100%;
+            margin: 20px auto 40px auto;
+            background: white;
+            padding: 20px 25px;
+            border-radius: 16px;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.08);
+        }
+
+        .chart-section h3 {
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #444;
+        }
+
+        /* Expenses List */
+        .date-title {
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-size: 15px;
+            color: #666;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .expense-card {
+            background: white;
+            padding: 18px 20px;
+            border-radius: 14px;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.08);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+        }
+
+        .expense-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .left-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .emoji {
+            font-size: 28px;
+        }
+
+        .category {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .description {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: #4A90E2;
+        }
+        /* MAIN 2-COLUMN WRAPPER */
+.main-wrapper {
+    display: flex;
+    gap: 25px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+
+/* LEFT PANEL → CENTER CONTENT */
+.left-panel {
+    width: 55%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;      /* horizontally center everything */
+    justify-content: flex-start;
+}
+
+.chart-section {
+    width: 75%;               /* previously was 100% → now centered */
+    margin: 20px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+/* Reduce pie chart size */
+#expensePieChart {
+    max-width: 90% !important;   /* 10% smaller */
+    margin: auto;
+}
+
+
+/* RIGHT: EXPENSE LIST */
+.right-panel {
+    width: 45%;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+/* THIN DIVIDER */
+.divider {
+    width: 2px;
+    background: #e0e0e0;
+    border-radius: 2px;
+}
+    .summary-card {
+    background: white;
+    padding: 18px;
+    border-radius: 14px;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+    font-size: 15px;
+    text-align:center;
+}
+
+.summary-card h3 {
+    margin: 0 0 10px;
+    font-size: 17px;
+    color: #333;
+    font-weight: 700;
+}
+
+.summary-card p {
+    margin: 6px 0;
+    color: #444;
+}
+        .trend {
+    font-size: 13px;
+    margin-top: 3px;
+    font-weight: 600;
+}
+
+.trend:contains('↑') {
+    color: #28a745; /* green */
+}
+
+.trend:contains('↓') {
+    color: #d9534f; /* red */
+}
+.trend {
+    font-size: 13px;
+    margin: 2px 0 6px 0;
+    font-weight: 600;
+}
+
+.trend.inc {
+    color: #d9534f; /* RED for Increasing */
+}
+
+.trend.dec {
+    color: #28a745; /* GREEN for Decreasing */
+}
+
+.trend.stable {
+    color: #6b7280; /* gray */
+}
+
+
+
+
+    </style>
+</head>
+
+<body>
+
+<!-- NAV BAR -->
+<div class="navbar">
+    <h2>Penny Tracker</h2>
+
+    <div>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/my-expenses">My Expenses</a>
+        <a href="/logout" style="color:#d9534f;">Logout</a>
+    </div>
+</div>
+
+<div class="main-wrapper">
+
+    <!-- LEFT SIDE : GRAPHS -->
+    <div class="left-panel">
+
+        <div class="chart-section">
+            <h3>Spendings of Selected Year</h3>
+
+            <!-- YEAR DROPDOWN -->
+            <select id="yearSelect" style="
+            padding:8px;
+            font-size:15px;
+            border-radius:6px;
+            margin-bottom:15px;
+            border:1px solid #ccc;
+        ">
+                <option th:each="y : ${years}"
+                        th:value="${y}"
+                        th:text="${y}"
+                        th:selected="${y == selectedYear}">
+
+                </option>
+            </select>
+
+            <!-- BAR CHART -->
+            <canvas id="yearBarChart"></canvas>
+        </div>
+        <div class="summary-card" id="summaryCard">
+            <h3>Yearly Summary</h3>
+            <p>Total Spendings: <span id="sumTotal">₹0</span></p>
+            <p>Top Category: <span id="sumCategory">-</span></p>
+            <p>Highest Month: <span id="sumMonth">-</span></p>
+        </div>
+
+
+        <div class="chart-section">
+            <h3>Category Wise Expense Split</h3>
+            <canvas id="expensePieChart"></canvas>
+        </div>
+
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="divider"></div>
+
+    <!-- RIGHT SIDE : EXPENSE LIST -->
+    <div class="right-panel">
+
+        <div th:if="${expenses.size()} == 0"
+             style="text-align:center; margin-top:40px;">
+            No expenses recorded yet.
+        </div>
+
+        <div th:each="e, iterStat : ${expenses}">
+
+            <!-- DATE HEADER -->
+            <div class="date-title"
+                 th:if="${iterStat.index == 0 or expenses[iterStat.index - 1].date != e.date}">
+                <span th:text="${e.date}"></span>
+            </div>
+
+            <!-- EXPENSE CARD -->
+            <div class="expense-card">
+
+                <div class="left-section">
+                    <div class="emoji" th:text="${emoji.get(e.category)}"></div>
+
+                    <div>
+                        <div class="category" th:text="${e.category}"></div>
+
+                        <!-- TREND (SHOW ONLY ON THE LATEST ENTRY OF THIS CATEGORY) -->
+                        <div class="trend"
+                             th:if="${latestId[e.category] == e.id}"
+                             th:with="val=${trendMap[e.category] == null ? 'No previous data' : trendMap[e.category]}"
+                             th:text="${val}"
+                             th:classappend="${
+                            val != null && val.contains('Increasing') ? ' inc' :
+                            (val != null && val.contains('Decreasing') ? ' dec' : ' stable')
+                         }">
+                        </div>
+
+                        <div class="description" th:text="${e.description}"></div>
+                    </div>
+                </div>
+
+                <div class="amount">
+                    ₹ <span th:text="${e.amount}"></span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+</div>
+
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const yearSelect = document.getElementById("yearSelect");
+        const barCanvas = document.getElementById("yearBarChart");
+        const pieCanvas = document.getElementById("expensePieChart");
+
+        let barChart;
+        let pieChart;
+
+        /* -------------------------------
+           LOAD MONTHLY BAR CHART
+        -------------------------------- */
+        function loadBarChart(year) {
+
+            fetch(`/api/monthly-expenses?year=${year}`)
+                .then(r => r.json())
+                .then(data => {
+
+                    const months = Object.keys(data);
+                    const values = Object.values(data);
+
+                    if (barChart) barChart.destroy();
+
+                    barChart = new Chart(barCanvas, {
+                        type: "bar",
+                        data: {
+                            labels: months,
+                            datasets: [{
+                                label: `Monthly Spending - ${year}`,
+                                data: values,
+                                backgroundColor: "#4A90E2"
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: { y: { beginAtZero: true } }
+                        }
+                    });
+                });
+        }
+
+        /* -------------------------------
+           CATEGORY PIE CHART
+        -------------------------------- */
+        function loadPieChart(year) {
+
+    fetch(`/api/expense-data-year?year=${year}`)
+        .then(r => r.json())
+        .then(data => {
+
+            const labels = Object.keys(data);
+            const values = Object.values(data);
+
+            if (pieChart) pieChart.destroy();
+
+            pieChart = new Chart(pieCanvas, {
+                type: "pie",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [
+                            "#FF6384", "#36A2EB", "#FFCE56",
+                            "#4BC0C0", "#9966FF", "#FF9F40"
+                        ]
+                    }]
+                },
+                options: { responsive: true }
+            });
+        });
+}
+
+        /* -------------------------------
+           YEAR SUMMARY CARD
+        -------------------------------- */
+        function loadSummaryCard(year) {
+
+            fetch(`/api/year-summary?year=${year}`)
+                .then(r => r.json())
+                .then(data => {
+
+                    document.getElementById("sumTotal").textContent = "₹" + data.total;
+                    document.getElementById("sumCategory").textContent =
+                        data.topCategory ? data.topCategory : "-";
+
+                    const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+                    document.getElementById("sumMonth").textContent =
+                        data.topMonth ? monthNames[data.topMonth - 1] : "-";
+                });
+        }
+
+        /* -------------------------------
+            WHEN YEAR DROPDOWN CHANGES
+        -------------------------------- */
+        yearSelect.addEventListener("change", function () {
+            const selectedYear = this.value;
+
+            loadBarChart(selectedYear);
+            loadSummaryCard(selectedYear);
+            loadExpenseCards(selectedYear);
+             loadPieChart(selectedYear);
+
+
+            // We DO NOT reload the page anymore.
+        });
+
+        /* -------------------------------
+            INITIAL LOAD
+        -------------------------------- */
+        const startYear = yearSelect.value;
+        loadBarChart(startYear);
+        loadPieChart(startYear);
+        loadSummaryCard(startYear);
+
+    });
+    function loadExpenseCards(year) {
+
+    fetch(`/api/expenses-by-year?year=${year}`)
+        .then(r => r.json())
+        .then(list => {
+
+            const panel = document.querySelector(".right-panel");
+            panel.innerHTML = ""; // clear current cards
+
+            if (list.length === 0) {
+                panel.innerHTML = "<p style='text-align:center;margin-top:20px;'>No expenses recorded in this year.</p>";
+                return;
+            }
+
+            let lastDate = "";
+
+            list.forEach(e => {
+
+                // DATE TITLE
+                if (e.date !== lastDate) {
+                    lastDate = e.date;
+                    panel.innerHTML += `
+                        <div class="date-title">${e.date}</div>
+                    `;
+                }
+
+                // CARD
+                panel.innerHTML += `
+                    <div class="expense-card">
+
+                        <div class="left-section">
+                            <div class="emoji">${emojiForCategory(e.category)}</div>
+
+                            <div>
+                                <div class="category">${e.category}</div>
+                                <div class="description">${e.description || ""}</div>
+                            </div>
+                        </div>
+
+                        <div class="amount">₹ ${e.amount}</div>
+                    </div>
+                `;
+            });
+        });
+}
+function emojiForCategory(cat) {
+    switch (cat) {
+        case "Food": return "🍔";
+        case "Travel": return "🚕";
+        case "Shopping": return "🛍️";
+        case "Bills": return "💡";
+        case "Entertainment": return "🎬";
+        default: return "🔖";
+    }
+}
+
+</script>
+
+</body>
+</html>
